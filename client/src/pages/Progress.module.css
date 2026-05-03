@@ -1,0 +1,52 @@
+.header { margin-bottom: 2rem; }
+.header h1 { margin: 0.25rem 0 0; }
+
+.overview {
+  display: flex; gap: 2.5rem; align-items: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2rem 2.5rem;
+  margin-bottom: 2.5rem; flex-wrap: wrap;
+}
+.overviewText h2 { margin-bottom: 0.4rem; }
+.overviewText p  { color: var(--text-muted); }
+
+/* Table */
+.table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.thead, .trow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 0; align-items: center;
+}
+.thead {
+  padding: 0.65rem 1.25rem;
+  background: var(--surface-2);
+  font-size: 0.78rem; font-weight: 700; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.trow {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+.trow:hover { background: rgba(255,255,255,0.02); }
+.modLink { color: var(--text-soft); font-weight: 500; transition: var(--transition); }
+.modLink:hover { color: var(--accent); }
+
+/* Achievements */
+.achievements { display: flex; flex-direction: column; gap: 0.75rem; }
+.achievement {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+.earned { border-color: rgba(245,166,35,0.3); }
+.locked { opacity: 0.45; filter: grayscale(0.6); }
+.achIcon { font-size: 1.75rem; flex-shrink: 0; }
+.achievement strong { display:block; font-size:0.95rem; }
+.achievement p { font-size:0.82rem; color:var(--text-muted); margin:0; }
+.lock { margin-left: auto; font-size: 1.1rem; }
+
+@media (max-width: 600px) {
+  .thead { display: none; }
+  .trow  { grid-template-columns: 1fr 1fr; row-gap: 0.25rem; }
+  .overview { padding: 1.5rem; gap: 1.5rem; }
+}

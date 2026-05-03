@@ -1,0 +1,53 @@
+.header { margin-bottom: 2rem; }
+.header h1 { margin: 0.25rem 0 0.4rem; }
+
+.searchSection { margin-bottom: 1.5rem; }
+.searchRow { display:flex; gap:0.6rem; flex-wrap:wrap; }
+.searchInput {
+  flex:1; min-width:220px;
+  background:var(--surface-2); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:0.65rem 1rem; font-size:0.95rem; font-family:var(--font);
+  transition:var(--transition);
+}
+.searchInput:focus { border-color:var(--accent); outline:none; }
+
+.resultCard { padding:1.5rem; margin-top:1rem; }
+.resultHeader { display:flex; justify-content:space-between; align-items:flex-start; gap:0.75rem; margin-bottom:0.5rem; }
+.resultHeader h2 { font-size:1.15rem; color:var(--accent); }
+.def  { color:var(--text-soft); font-size:0.95rem; margin-bottom:0.5rem; }
+.example { font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem; }
+.related { font-size:0.82rem; color:var(--text-muted); }
+.relBtn { background:none; border:none; color:var(--accent); font-size:inherit; cursor:pointer; text-decoration:underline; }
+
+.filterRow { display:flex; flex-direction:column; gap:0.75rem; margin-bottom:1.5rem; }
+.filterInput {
+  width:100%; max-width:340px;
+  background:var(--surface-2); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:0.55rem 0.9rem; font-size:0.9rem; font-family:var(--font);
+}
+.filterInput:focus { border-color:var(--accent); outline:none; }
+
+.alphabet { display:flex; flex-wrap:wrap; gap:4px; }
+.letterBtn {
+  width:30px; height:30px; border-radius:6px;
+  background:var(--surface-2); color:var(--text-muted);
+  border:1px solid transparent; font-size:0.78rem; font-weight:600;
+  transition:var(--transition);
+}
+.letterBtn:hover { color:var(--accent); border-color:var(--accent); }
+.letterBtn.active { background:var(--accent); color:var(--primary); border-color:var(--accent); }
+
+.grid {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:1rem; margin-top:0.5rem;
+}
+.termCard { padding:1.25rem; }
+.termHeader { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem; }
+.termHeader h2 { font-size:1rem; color:var(--accent); }
+.copyBtn { background:none; border:none; color:var(--text-muted); font-size:1rem; transition:var(--transition); }
+.copyBtn:hover { color:var(--accent); }
+.termDef { font-size:0.875rem; color:var(--text-soft); margin-bottom:0.4rem; }
+.termEx  { font-size:0.8rem;   color:var(--text-muted); margin-bottom:0.35rem; }
+.relatedSmall { font-size:0.77rem; color:var(--accent); opacity:0.8; }

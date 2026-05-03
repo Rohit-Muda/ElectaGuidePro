@@ -1,0 +1,12 @@
+**/node_modules
+**/.env
+**/.env.*
+**/npm-debug.log
+**/coverage
+**/__tests__
+**/dist
+server/cloudrun.yaml
+.git
+.gitignore
+*.md
+deploy.sh

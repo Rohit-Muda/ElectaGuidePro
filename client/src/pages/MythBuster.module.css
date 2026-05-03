@@ -1,0 +1,45 @@
+.header { margin-bottom: 2rem; }
+.header h1 { margin: 0.25rem 0 0.4rem; }
+.counter { font-size:0.9rem; color:var(--accent); margin-top:0.5rem; font-weight:500; }
+.centre  { text-align:center; margin-bottom:2.5rem; }
+
+.flipWrap { perspective: 1200px; max-width:680px; margin:0 auto; }
+
+.flipCard {
+  position: relative;
+  width: 100%; min-height: 320px;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+}
+.isFlipped { transform: rotateY(180deg); }
+
+.face {
+  position: absolute; inset:0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  padding: 2.5rem 2rem;
+  display:flex; flex-direction:column; align-items:flex-start;
+  min-height:320px;
+}
+.back { transform: rotateY(180deg); }
+
+.faceLabel { font-size:0.75rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); margin-bottom:1rem; }
+
+.mythText {
+  font-size:1.2rem; line-height:1.6; color:var(--text-soft);
+  border-left:3px solid var(--error); padding-left:1rem;
+  font-style:italic;
+}
+.factText {
+  font-size:1.05rem; line-height:1.65; color:var(--text-soft);
+  flex:1;
+}
+.source { font-size:0.82rem; color:var(--text-muted); margin-top:0.75rem; }
+.backActions { display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:1.5rem; }
+
+.empty { text-align:center; color:var(--text-muted); margin-top:1rem; }
+
+@media (max-width:480px) {
+  .face { padding:1.5rem 1.25rem; }
+  .mythText { font-size:1rem; }
+}

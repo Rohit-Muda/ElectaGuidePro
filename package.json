@@ -1,0 +1,13 @@
+{
+  "name": "electaguide-pro",
+  "version": "1.0.0",
+  "description": "ElectaGuide Pro — AI-powered election education platform",
+  "private": true,
+  "scripts": {
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "test":       "cd server && npm test",
+    "build":      "cd client && npm run build",
+    "install:all":"npm install --prefix server && npm install --prefix client"
+  }
+}
