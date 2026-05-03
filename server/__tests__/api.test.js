@@ -1,5 +1,21 @@
 const request = require('supertest');
-const app     = require('../index');
+
+// Mock the Gemini lib to return predictable responses
+const mockGetModel = jest.fn().mockReturnValue(null);
+jest.mock('../lib/gemini', () => {
+  return {
+    getModel: mockGetModel,
+    MODEL_ID: 'gemini-2.5-flash',
+  };
+});
+
+const app        = require('../index');
+const geminiMock = require('../lib/gemini');
+
+beforeEach(() => {
+  mockGetModel.mockReset();
+  mockGetModel.mockReturnValue(null); // Default to demo mode
+});
 
 describe('Health Check', () => {
   it('GET /api/health → 200 with status ok', async () => {
@@ -11,8 +27,9 @@ describe('Health Check', () => {
 });
 
 describe('Modules API', () => {
-  /* Ensure Gemini is not called in test (no key = instant fallback) */
-  beforeAll(() => { delete process.env.GEMINI_API_KEY; });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('GET /api/modules → returns 8 modules', async () => {
     const res = await request(app).get('/api/modules');
@@ -21,13 +38,35 @@ describe('Modules API', () => {
     expect(res.body.modules).toHaveLength(8);
   });
 
-  it('GET /api/modules/1 → returns module with content', async () => {
+  it('GET /api/modules/1 with AI key → returns AI generated content', async () => {
+    geminiMock.getModel.mockReturnValueOnce({
+      generateContent: jest.fn().mockResolvedValue({
+        response: { text: () => 'Mocked AI Content for Module' }
+      })
+    });
     const res = await request(app).get('/api/modules/1');
     expect(res.status).toBe(200);
-    expect(res.body.id).toBe(1);
-    expect(res.body.title).toBeDefined();
+    expect(res.body.content).toBe('Mocked AI Content for Module');
+    expect(res.body.fromCache).toBe(false);
+  });
+
+  it('GET /api/modules/2 with AI error → graceful fallback', async () => {
+    geminiMock.getModel.mockReturnValueOnce({
+      generateContent: jest.fn().mockRejectedValue(new Error('AI failed'))
+    });
+    const res = await request(app).get('/api/modules/2');
+    expect(res.status).toBe(200);
+    expect(res.body.demo).toBe(true);
     expect(res.body.content).toBeDefined();
-  }, 10000);
+  });
+
+  it('GET /api/modules/3 without AI key → instant fallback', async () => {
+    geminiMock.getModel.mockReturnValueOnce(null);
+    const res = await request(app).get('/api/modules/3');
+    expect(res.status).toBe(200);
+    expect(res.body.demo).toBe(true);
+    expect(res.body.fromCache).toBe(false);
+  });
 
   it('GET /api/modules/99 → 404', async () => {
     const res = await request(app).get('/api/modules/99');
@@ -67,6 +106,10 @@ describe('Quiz API', () => {
 });
 
 describe('Glossary API', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('GET /api/glossary → returns 30 terms', async () => {
     const res = await request(app).get('/api/glossary');
     expect(res.status).toBe(200);
@@ -74,16 +117,123 @@ describe('Glossary API', () => {
     expect(res.body.terms.length).toBe(30);
   });
 
-  it('GET /api/glossary/search?q=ballot → returns term', async () => {
+  it('GET /api/glossary/search?q=ballot → returns term from static list', async () => {
     const res = await request(app).get('/api/glossary/search?q=ballot');
     expect(res.status).toBe(200);
-    expect(res.body.term).toBeDefined();
-    expect(res.body.definition).toBeDefined();
+    expect(res.body.term.toLowerCase()).toBe('ballot');
+    expect(res.body.fromCache).toBe(false);
+  });
+
+  it('GET /api/glossary/search?q=ballot again → returns from cache', async () => {
+    const res = await request(app).get('/api/glossary/search?q=ballot');
+    expect(res.status).toBe(200);
+    expect(res.body.fromCache).toBe(true);
+  });
+
+  it('GET /api/glossary/search?q=unknown_term with AI → returns AI term', async () => {
+    geminiMock.getModel.mockReturnValueOnce({
+      generateContent: jest.fn().mockResolvedValue({
+        response: { text: () => '{"definition":"AI Def","example":"Ex","relatedTerms":[]}' }
+      })
+    });
+    // Use a unique term so it's not cached
+    const res = await request(app).get('/api/glossary/search?q=unknown_term');
+    expect(res.status).toBe(200);
+    expect(res.body.definition).toBe('AI Def');
+  });
+
+  it('GET /api/glossary/search?q=unknown_term_2 without AI → fallback', async () => {
+    geminiMock.getModel.mockReturnValueOnce(null);
+    const res = await request(app).get('/api/glossary/search?q=unknown_term_2');
+    expect(res.status).toBe(200);
+    expect(res.body.demo).toBe(true);
   });
 
   it('GET /api/glossary/search?q=a → 400 (too short)', async () => {
     const res = await request(app).get('/api/glossary/search?q=a');
     expect(res.status).toBe(400);
+  });
+});
+
+describe('Chat API', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('POST /api/chat with valid message and AI configured → 200', async () => {
+    geminiMock.getModel.mockReturnValueOnce({
+      startChat: jest.fn().mockReturnValue({
+        sendMessage: jest.fn().mockResolvedValue({
+          response: { text: () => 'Hello from AI' }
+        })
+      })
+    });
+    const res = await request(app)
+      .post('/api/chat')
+      .send({ message: 'Hello' });
+    expect(res.status).toBe(200);
+    expect(res.body.reply).toBe('Hello from AI');
+  });
+
+  it('POST /api/chat with missing AI key → demo fallback', async () => {
+    geminiMock.getModel.mockReturnValueOnce(null);
+    const res = await request(app)
+      .post('/api/chat')
+      .send({ message: 'Hello' });
+    expect(res.status).toBe(200);
+    expect(res.body.demo).toBe(true);
+  });
+
+  it('POST /api/chat with AI error → 502', async () => {
+    geminiMock.getModel.mockReturnValueOnce({
+      startChat: jest.fn().mockReturnValue({
+        sendMessage: jest.fn().mockRejectedValue(new Error('AI Error'))
+      })
+    });
+    const res = await request(app)
+      .post('/api/chat')
+      .send({ message: 'Hello' });
+    expect(res.status).toBe(502);
+  });
+
+  it('POST /api/chat with empty message → 400', async () => {
+    const res = await request(app)
+      .post('/api/chat')
+      .send({ message: '' });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe('Myths API', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('GET /api/myths/random with AI → 200', async () => {
+    geminiMock.getModel.mockReturnValueOnce({
+      generateContent: jest.fn().mockResolvedValue({
+        response: { text: () => '{"myth":"A","fact":"B","source":"C"}' }
+      })
+    });
+    const res = await request(app).get('/api/myths/random');
+    expect(res.status).toBe(200);
+    expect(res.body.myth).toBe('A');
+  });
+
+  it('GET /api/myths/random with invalid AI JSON → 502', async () => {
+    geminiMock.getModel.mockReturnValueOnce({
+      generateContent: jest.fn().mockResolvedValue({
+        response: { text: () => 'Not JSON' }
+      })
+    });
+    const res = await request(app).get('/api/myths/random');
+    expect(res.status).toBe(502);
+  });
+
+  it('GET /api/myths/random without AI → 503 fallback', async () => {
+    geminiMock.getModel.mockReturnValueOnce(null);
+    const res = await request(app).get('/api/myths/random');
+    expect(res.status).toBe(503);
   });
 });
 
@@ -93,3 +243,5 @@ describe('404 Handler', () => {
     expect(res.status).toBe(404);
   });
 });
+
+

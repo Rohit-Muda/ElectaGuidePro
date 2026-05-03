@@ -6,7 +6,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      /* Dev only: proxy /api → local Express server */
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
@@ -25,4 +24,13 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/setupTests.js'],
+    globals: true,
+    coverage: {
+      reporter: ['text', 'json', 'html'],
+      provider: 'v8'
+    }
+  }
 });

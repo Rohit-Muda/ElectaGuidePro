@@ -40,9 +40,12 @@ export default function App() {
   const isChat   = location.pathname === '/chat';
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <Navbar />
-      <main id="main-content" tabIndex={-1}>
+      <main id="main-content" style={{ flexGrow: 1, flexShrink: 0, flexBasis: 'auto', display: 'flex', flexDirection: 'column' }}>
         <Suspense fallback={<PageFallback />}>
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
@@ -66,6 +69,6 @@ export default function App() {
       </main>
       <Footer />
       {!isChat && <FloatingChat />}
-    </>
+    </div>
   );
 }

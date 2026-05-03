@@ -16,7 +16,18 @@ const PORT = process.env.PORT || 5000;
 /* ── Security ────────────────────────────────────────────── */
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
-  contentSecurityPolicy: false, // managed by frontend headers
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://generativelanguage.googleapis.com"],
+      fontSrc: ["'self'", "data:", "https:"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
 }));
 
 /* CORS only needed in dev (same-origin in production via Cloud Run) */
@@ -30,9 +41,9 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.json({ limit: '10kb' }));
 
 /* ── API Routes ──────────────────────────────────────────── */
-app.get('/api/health', (_req, res) =>
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' })
-);
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
+});
 
 app.use('/api/chat',     chatRouter);
 app.use('/api/modules',  modulesRouter);
